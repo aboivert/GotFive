@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Got Five - Tirage</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <!-- Écran d'accueil -->
+        <section id="welcome-screen" class="screen active">
+            <div class="glass-card">
+                <h1>Got Five</h1>
+                <p class="subtitle">Assistant de Tirage</p>
+                
+                <div class="input-group">
+                    <label for="player1">Joueur 1</label>
+                    <input type="text" id="player1" placeholder="Nom du joueur 1" autocomplete="off">
+                </div>
+                
+                <div class="input-group">
+                    <label for="player2">Joueur 2</label>
+                    <input type="text" id="player2" placeholder="Nom du joueur 2" autocomplete="off">
+                </div>
+                
+                <button id="start-btn" class="primary-btn">Démarrer la partie</button>
+            </div>
+        </section>
+
+        <!-- Écran de Transition / Révélation (Nouveau) -->
+        <section id="step-screen" class="screen">
+            <div class="glass-card">
+                <h2 id="step-title">Confirmation</h2>
+                <div id="step-body" class="pions-grid" style="margin: 20px 0; display:none">
+                    <!-- Utilisé pour afficher les pions lors du tirage -->
+                </div>
+                <p id="step-msg" style="margin: 20px 0; line-height: 1.6;"></p>
+                <button id="step-btn" class="primary-btn">Continuer</button>
+            </div>
+        </section>
+
+        <!-- Écran de jeu -->
+        <section id="game-screen" class="screen">
+            <div class="header">
+                <div class="header-main">
+                    <h1>Got Five</h1>
+                    <div class="header-actions">
+                        <span id="turn-badge">Tour <span id="turn-num">1</span></span>
+                        <button id="restart-btn" class="action-btn small-btn">Recommencer la partie</button>
+                    </div>
+                </div>
+                <div id="player-indicator">
+                    Au tour de <strong id="active-player-name">Joueur 1</strong>
+                </div>
+            </div>
+
+            <div class="game-content">
+                <!-- Section Pioche -->
+                <div class="section-pioche">
+                    <div class="section-header">
+                        <h3>Pioche</h3>
+                        <p id="pioche-hint" class="section-hint">Tirer une couleur</p>
+                    </div>
+                    <div id="pioche-stats" class="stats-grid">
+                        <!-- Rempli par le JS (cliquable) -->
+                    </div>
+                </div>
+
+                <!-- Section Centre -->
+                <div class="section-centre">
+                    <div class="section-header">
+                        <h3>Centre du jeu</h3>
+                        <p id="centre-hint" class="section-hint">Défausser un pion</p>
+                    </div>
+                    <div id="pions-centre" class="pions-grid">
+                        <!-- Rempli par le JS (Trié) -->
+                    </div>
+                </div>
+
+                <!-- Section Défausse -->
+                <div class="section-defausse">
+                    <div class="section-header">
+                        <h3>Défausse</h3>
+                    </div>
+                    <div id="pions-defausse" class="defausse-grid">
+                        <!-- Rempli par le JS (Ordre inverse) -->
+                    </div>
+                </div>
+
+                <!-- Zone Got Five -->
+                <div id="gotfive-area" style="margin-top:20px; text-align:center">
+                    <button id="gotfive-btn" class="primary-btn gold-btn pulse">GOT FIVE !</button>
+                </div>
+            </div>
+
+            <!-- Barre de Navigation Basse (Plus de défausse ici) -->
+            <div class="bottom-nav">
+                <button class="nav-btn" data-info="joueur1">Pile J1</button>
+                <button class="nav-btn" data-info="joueur2">Pile J2</button>
+            </div>
+        </section>
+
+        <!-- Modale de Confirmation de Redémarrage -->
+        <div id="modal-restart" class="modal">
+            <div class="modal-content">
+                <h3>Voulez-vous recommencer ?</h3>
+                <p style="margin: 15px 0; color: var(--text-secondary); font-size: 0.9rem;">Souhaitez-vous garder les mêmes joueurs ?</p>
+                <div style="display:flex; flex-direction:column; gap:12px; margin-top:20px">
+                    <button id="restart-same" class="restart-same primary-btn">Mêmes joueurs</button>
+                    <button id="restart-new" class="restart-new nav-btn">Changer de joueurs</button>
+                    <button class="close-modal" style="margin-top:10px; border:none; background:transparent; color:var(--text-secondary); cursor:pointer; font-size:0.8rem">Annuler</button>
+                </div>
+            </div>
+        </div>
+        <!-- Modale de Vue (Pile J1, J2, Défausse) -->
+        <div id="modal-view" class="modal">
+            <div class="modal-content">
+                <h3 id="view-title">Contenu</h3>
+                <div id="view-pions" class="pions-grid">
+                    <!-- Pions de la pile choisie -->
+                </div>
+                <button id="close-view" class="primary-btn" style="margin-top:20px">Fermer</button>
+            </div>
+        </div>
+
+        <!-- Modale de Victory / Win -->
+        <div id="modal-win" class="modal">
+            <div class="modal-content celebration">
+                <div id="confetti-container" class="confetti-container"></div>
+                <h2 id="win-headline">Félicitations ! 🎉</h2>
+                <div class="win-emoji">🏆🥳🎊</div>
+                <p id="win-msg" style="margin: 20px 0; font-size: 1.2rem; font-weight: 700;"></p>
+                <div style="display:flex; flex-direction:column; gap:12px; width:100%">
+                    <button class="restart-same primary-btn">Recommencer avec les mêmes joueurs</button>
+                    <button class="restart-new nav-btn">Changer de joueurs</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modale de Vérification Got Five -->
+        <div id="modal-gotfive" class="modal">
+            <div class="modal-content">
+                <h3>Vérifiez vos pions ! 🧐</h3>
+                <p style="margin: 15px 0; color: var(--text-secondary);">Quelqu'un a-t-il gagné ?</p>
+                <div style="display:flex; gap:10px; margin-top:20px; width:100%">
+                    <button id="win-j1-btn" class="primary-btn small-btn" style="flex:1">J1 a gagné</button>
+                    <button id="win-j2-btn" class="primary-btn small-btn" style="flex:1">J2 a gagné</button>
+                </div>
+                <button id="continue-game-btn" class="nav-btn" style="margin-top:15px; width:100%">Personne, on continue</button>
+            </div>
+        </div>
+
+        <!-- Modale de Validation (Sécurité) -->
+        <div id="modal-auth" class="modal">
+            <div class="modal-content">
+                <h3>Vérification</h3>
+                <p id="auth-msg">Êtes-vous bien le Joueur 1 ?</p>
+                <div style="display:flex; gap:10px; margin-top:20px">
+                    <button id="auth-confirm" class="primary-btn">Oui, voir ma pile</button>
+                    <button id="auth-cancel" class="close-modal">Annuler</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

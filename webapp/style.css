@@ -1,12 +1,12 @@
 :root {
-    --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-    --accent-primary: #3b82f6;
-    --accent-secondary: #8b5cf6;
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
-    --glass-bg: rgba(255, 255, 255, 0.05);
-    --glass-border: rgba(255, 255, 255, 0.1);
-    --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    --bg-gradient: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+    --accent-primary: #f97316;
+    --accent-secondary: #ea580c;
+    --text-primary: #1c1917;
+    --text-secondary: #78716c;
+    --glass-bg: rgba(255, 255, 255, 0.75);
+    --glass-border: rgba(0, 0, 0, 0.05);
+    --card-shadow: 0 10px 30px rgba(249, 115, 22, 0.15);
 }
 
 * {
@@ -72,7 +72,7 @@ body {
 h1 {
     font-size: 2.5rem;
     font-weight: 800;
-    background: linear-gradient(to right, #60a5fa, #a78bfa);
+    background: linear-gradient(to right, #fdba74, #ea580c);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -109,7 +109,7 @@ h1 {
     border: 1px solid var(--glass-border);
     border-radius: 12px;
     padding: 15px;
-    color: white;
+    color: var(--text-primary);
     font-size: 1rem;
     outline: none;
     transition: border-color 0.3s ease;
@@ -147,7 +147,7 @@ h1 {
 
 .primary-btn {
     width: 100%;
-    background: linear-gradient(to right, #3b82f6, #8b5cf6);
+    background: linear-gradient(to right, #ea580c, #f97316);
     color: white;
     border: none;
     border-radius: 12px;
@@ -155,9 +155,16 @@ h1 {
     font-size: 1.1rem;
     font-weight: 600;
     cursor: pointer;
-    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 4px 15px rgba(234, 88, 12, 0.3);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
-    margin-top: 10px;
+}
+
+.primary-btn.mt-3 {
+    margin-top: 15px; /* Utilitaire pour ajouter une marge si besoin */
+}
+
+.primary-btn.mt-4 {
+    margin-top: 20px;
 }
 
 .primary-btn:active {
@@ -171,9 +178,13 @@ h1 {
 }
 
 /* Game Screen Layout */
+#game-screen {
+    justify-content: flex-start;
+}
+
 .header {
     width: 100%;
-    margin-bottom: 20px;
+    margin-bottom: 12px;
 }
 
 .header-main {
@@ -184,12 +195,13 @@ h1 {
 }
 
 #turn-badge {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.05);
     border: 1px solid var(--glass-border);
     padding: 6px 14px;
     border-radius: 20px;
     font-size: 0.85rem;
     font-weight: 700;
+    color: var(--text-primary);
 }
 
 .header-actions {
@@ -199,9 +211,9 @@ h1 {
 }
 
 .icon-btn {
-    background: var(--glass-bg);
+    background: rgba(0, 0, 0, 0.05);
     border: 1px solid var(--glass-border);
-    color: white;
+    color: var(--text-primary);
     width: 36px;
     height: 36px;
     border-radius: 50%;
@@ -218,19 +230,21 @@ h1 {
 }
 
 #player-indicator {
-    background: rgba(59, 130, 246, 0.05);
+    background: rgba(249, 115, 22, 0.1);
     border-left: 4px solid var(--accent-primary);
     padding: 10px 15px;
     border-radius: 0 10px 10px 0;
     font-size: 0.95rem;
     text-align: left;
+    color: var(--text-primary);
 }
 
 .game-content {
     flex: 1;
+    display: flex;
+    flex-direction: column;
     overflow-y: auto;
     width: 100%;
-    padding-bottom: 80px; /* Space for bottom nav */
 }
 
 .section-header {
@@ -250,33 +264,41 @@ h1 {
 }
 
 @keyframes flash {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.4;
+    }
 }
 
 /* Pioche Stats as Buttons */
 .section-pioche {
-    margin-bottom: 20px;
+    margin-bottom: 12px;
 }
 
 .stats-grid {
     display: flex;
-    justify-content: space-between;
-    gap: 8px;
+    justify-content: center; /* Centrer les petits carrés */
+    gap: 12px;
+    height: 65px !important; /* Hauteur fixe ajustée */
 }
 
 .stat-item {
-    flex: 1;
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    border-radius: 12px;
-    padding: 10px 5px;
+    width: 45px;
+    height: 45px;
+    flex: 0 0 45px; /* Carré strict */
+    border-radius: 10px;
+    padding: 0;
     display: flex;
-    flex-direction: column;
+    justify-content: center;
     align-items: center;
-    gap: 6px;
     cursor: pointer;
-    transition: transform 0.2s, background 0.2s;
+    transition: transform 0.2s, filter 0.2s;
+    border: 3px solid rgba(0, 0, 0, 0.3) !important; /* Bord plus foncé */
 }
 
 .stat-item:active {
@@ -289,34 +311,36 @@ h1 {
     pointer-events: none;
 }
 
-.color-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-}
-
 .stat-count {
-    font-size: 0.8rem;
-    font-weight: 800;
+    font-size: 1.3rem;
+    font-weight: 900;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 }
 
 /* Sections */
 .section-defausse {
-    margin-bottom: 20px;
-    background: rgba(0, 0, 0, 0.15);
+    margin-bottom: 12px;
+    background: rgba(255, 255, 255, 0.5) !important;
     border-radius: 16px;
     padding: 10px;
-    border: 1px dashed rgba(255, 255, 255, 0.1);
+    border: none !important;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0; /* Prend l'espace vide mais limite la croissance pour scroller */
+    min-height: 120px; /* Minimum garanti pour 1 ligne + padding */
 }
 
 .defausse-grid {
     display: grid;
-    grid-template-columns: repeat(6, 1fr); /* Strict 6 per line */
+    grid-template-columns: repeat(6, 1fr);
+    /* Strict 6 per line */
     gap: 10px;
-    max-height: 75px; /* Une seule ligne visible au repos */
+    flex: 1 1 0;
+    min-height: 0; /* CRÉCIAL pour forcer le scroll interne au lieu de l'étirement infini */
     overflow-y: auto;
     padding: 10px 5px;
     justify-items: center;
+    align-content: flex-start; /* Aligne les objets en haut même si l'espace est grand */
     -webkit-overflow-scrolling: touch;
 }
 
@@ -348,6 +372,21 @@ h1 {
     box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
 }
 
+#gotfive-area {
+    margin: 15px 0 20px 0;
+    text-align: center;
+}
+
+.section-piles {
+    margin-top: auto; /* Pousse les piles tout en bas de l'écran */
+    display: flex;
+    gap: 15px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 16px;
+    padding: 15px;
+    width: 100%;
+}
+
 .celebration {
     text-align: center;
     padding: 30px 20px !important;
@@ -360,8 +399,13 @@ h1 {
 }
 
 @keyframes bounce-win {
-    from { transform: scale(1); }
-    to { transform: scale(1.2) rotate(5deg); }
+    from {
+        transform: scale(1);
+    }
+
+    to {
+        transform: scale(1.2) rotate(5deg);
+    }
 }
 
 .pulse {
@@ -369,9 +413,17 @@ h1 {
 }
 
 @keyframes pulse-glow {
-    0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
-    70% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+    0% {
+        box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(245, 158, 11, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+    }
 }
 
 .confetti-container {
@@ -394,19 +446,26 @@ h1 {
 }
 
 @keyframes confetti-fall {
-    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
-    100% { transform: translateY(300px) rotate(720deg); opacity: 0; }
+    0% {
+        transform: translateY(-20px) rotate(0deg);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(300px) rotate(720deg);
+        opacity: 0;
+    }
 }
 
+/* Défausse spécifique (déjà à 45) */
 .defausse-grid .pion {
     flex: 0 0 45px;
     width: 45px;
     height: 45px;
-    font-size: 0.9rem;
 }
 
 .section-centre {
-    margin-bottom: 20px;
+    margin-bottom: 12px;
 }
 
 .section-header {
@@ -420,31 +479,53 @@ h1 {
     justify-content: center;
     align-items: center;
     flex-wrap: nowrap;
-    gap: 8px;
-    background: rgba(0, 0, 0, 0.2);
+    gap: 10px;
+    background: rgba(0, 0, 0, 0.2) !important;
     padding: 15px;
     border-radius: 16px;
-    min-height: 85px;
-    overflow-x: auto; /* Permet de scroller si trop de pions */
+    height: 90px !important; /* Hauteur fixe pour stabilité absolue */
+    overflow-x: auto;
+    /* Permet de scroller si trop de pions */
     -webkit-overflow-scrolling: touch;
 }
 
 .pion {
-    flex: 0 0 50px; /* Taille fixe pour rester sur une ligne */
-    width: 50px;
-    height: 50px;
+    flex: 0 0 45px;
+    width: 45px;
+    height: 45px;
     border-radius: 50%;
     display: flex;
+    flex-direction: column; /* Vertical pour le numéro et les points */
     justify-content: center;
     align-items: center;
     font-weight: 800;
-    font-size: 1rem;
     color: white;
     cursor: pointer;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-    border: 2px solid rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
     user-select: none;
+    position: relative;
+}
+
+.pion-number {
+    font-size: 1rem;
+    line-height: 1;
+    margin-top: -2px; /* Remonte un peu le numéro */
+}
+
+.pion-stars {
+    display: flex;
+    justify-content: center;
+    gap: 3px;
+    margin-top: 2px;
+}
+
+.star-dot {
+    width: 5px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.6); /* Gris clair/semi-transparent */
+    border-radius: 50%;
 }
 
 .pion:active {
@@ -462,7 +543,8 @@ h1 {
     color: var(--text-secondary);
     font-size: 0.85rem;
     margin-top: 10px;
-    display: none; /* Caché par défaut */
+    display: none;
+    /* Caché par défaut */
 }
 
 .pulse {
@@ -470,35 +552,34 @@ h1 {
 }
 
 @keyframes shadowPulse {
-    0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
-    70% { box-shadow: 0 0 0 15px rgba(59, 130, 246, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
-}
+    0% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+    }
 
-/* Bottom Nav */
-.bottom-nav {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: rgba(15, 23, 42, 0.9);
-    backdrop-filter: blur(10px);
-    border-top: 1px solid var(--glass-border);
-    display: flex;
-    padding: 10px 20px 25px;
-    gap: 15px;
+    70% {
+        box-shadow: 0 0 0 15px rgba(59, 130, 246, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+    }
 }
 
 .nav-btn {
     flex: 1;
-    background: var(--glass-bg);
+    background: rgba(0, 0, 0, 0.03);
     border: 1px solid var(--glass-border);
-    color: white;
-    padding: 12px;
+    color: var(--text-primary);
+    padding: 14px 16px;
     border-radius: 12px;
-    font-size: 0.8rem;
+    font-size: 1.1rem;
     font-weight: 600;
     cursor: pointer;
+    transition: background 0.2s;
+}
+
+.nav-btn:active {
+    background: rgba(0, 0, 0, 0.08);
 }
 
 /* Modals */
@@ -517,13 +598,27 @@ h1 {
 }
 
 .modal-content {
-    background: #1e293b;
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--glass-border);
     border-radius: 24px;
-    padding: 30px;
+    padding: 35px 25px;
     width: 100%;
     max-width: 400px;
     text-align: center;
+    box-shadow: var(--card-shadow);
+}
+
+.modal-content h3 {
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+}
+
+.modal-content p {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    line-height: 1.5;
 }
 
 .color-options {
@@ -532,6 +627,8 @@ h1 {
     gap: 15px;
     margin: 30px 0;
 }
+
+/* Retrait de modal-grid devenu obsolète */
 
 .color-opt {
     width: 45px;
@@ -549,10 +646,26 @@ h1 {
 
 .close-modal {
     background: transparent;
-    border: 1px solid var(--text-secondary);
+    border: 2px solid var(--glass-border);
     color: var(--text-secondary);
-    padding: 10px 20px;
-    border-radius: 10px;
+    padding: 14px 16px; /* Match 16px total avec le border */
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
     cursor: pointer;
+    transition: all 0.2s ease;
+    flex: 1; /* Remplissage égal dans les flex rows */
+    width: 100%;
 }
 
+.close-modal:active {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 25px;
+    width: 100%;
+}

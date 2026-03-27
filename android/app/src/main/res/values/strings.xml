@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Got Five</string>
+    <string name="title_activity_main">Got Five</string>
+    <string name="package_name">com.gotfive.app</string>
+    <string name="custom_url_scheme">com.gotfive.app</string>
+</resources>

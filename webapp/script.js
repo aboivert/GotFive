@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
         pioche: {},
         joueur1: {},
         joueur2: {},
-        centre: {},
+        centre: [],
         defausse: [],
         phase: "pioche",
         initStep: 0
@@ -88,8 +88,8 @@ document.addEventListener('DOMContentLoaded', () => {
         COLORS.forEach(c => {
             state.joueur1[c] = [];
             state.joueur2[c] = [];
-            state.centre[c] = [];
         });
+        state.centre = [];
         state.defausse = [];
         state.tour = 0;
         state.phase = "pioche";
@@ -100,7 +100,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!state.pioche[couleur] || state.pioche[couleur].length === 0) return null;
         const index = Math.floor(Math.random() * state.pioche[couleur].length);
         const pion = state.pioche[couleur].splice(index, 1)[0];
-        destination[couleur].push(pion);
+        
+        if (Array.isArray(destination)) {
+            destination.unshift({ num: pion, color: couleur });
+        } else {
+            destination[couleur].push(pion);
+        }
         return pion;
     }
 
@@ -146,13 +151,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Défausse : Ordre INVERSE
         renderPionList(pionsDefausseDiv, [...state.defausse].reverse(), false);
 
-        // Centre : Tri numérique STRICT
+        // Centre : Ajout du dernier tiré à gauche
         pionsCentreDiv.innerHTML = '';
-        const flatCentre = [];
-        COLORS.forEach(c => {
-            state.centre[c].forEach(num => flatCentre.push({ num, color: c }));
-        });
-        flatCentre.sort((a, b) => a.num - b.num).forEach(item => {
+        state.centre.forEach(item => {
             const p = createPionElement(item.num, item.color);
             if (state.phase === "defausse") {
                 p.addEventListener('click', () => defausserPion(item.num, item.color));
@@ -203,9 +204,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function defausserPion(num, couleur) {
-        const idx = state.centre[couleur].indexOf(num);
+        const idx = state.centre.findIndex(item => item.num === num && item.color === couleur);
         if (idx > -1) {
-            state.centre[couleur].splice(idx, 1);
+            state.centre.splice(idx, 1);
             state.defausse.push({ num: num, color: couleur });
             state.tour++;
             state.phase = "pioche";

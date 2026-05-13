@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carte de Déduction - Format A5 (GotFive)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #cbd5e1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .page-a4 {
+            width: 210mm;
+            height: 297mm;
+            background: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .card-a5 {
+            width: 210mm;
+            height: 148.5mm;
+            padding: 10mm 15mm;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card-a5:first-child {
+            border-bottom: 1px dashed #94a3b8;
+        }
+
+        h2 {
+            margin: 0 0 4mm 0;
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #475569;
+            letter-spacing: 1px;
+            text-align: center;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 2px;
+        }
+
+        .section {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .circles-container {
+            display: flex;
+        }
+
+        /* --- Section: Mon Jeu --- */
+        .section-mon-jeu .circles-container {
+            justify-content: space-evenly;
+            margin: 0 -15mm; /* Annule le padding horizontal de card-a5 pour avoir une équidistance parfaite */
+            padding: 0;
+        }
+        .circle-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3mm;
+        }
+        .circle {
+            width: 20mm;
+            height: 20mm;
+            border: 2px solid #1e293b;
+            border-radius: 50%;
+        }
+        .stars-rect {
+            width: 14mm;
+            height: 7mm;
+            border: 1.5px solid #64748b;
+            border-radius: 2px;
+        }
+        .color-line {
+            width: 20mm;
+            height: 5mm; /* Espace pour écrire */
+            border-bottom: 1px solid #94a3b8;
+        }
+
+        /* --- Section: Déduction (GotFive Tokens) --- */
+        .grid-deduction {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 2.5px;
+            padding: 2px 0;
+        }
+        .grid-cell {
+            height: 8.5mm;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            background: white;
+        }
+        .grid-header {
+            font-weight: bold;
+            font-size: 9px;
+            text-transform: uppercase;
+            box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1);
+        }
+        .token-cell {
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .token-num {
+            font-weight: bold;
+            font-size: 12px;
+            color: #1e293b;
+            line-height: 1;
+            margin-top: 2px;
+        }
+        .stars-row {
+            display: flex;
+            gap: 2px;
+            margin-top: 2px;
+        }
+        .star-dot {
+            width: 3.5px;
+            height: 3.5px;
+            background-color: #64748b;
+            border-radius: 50%;
+        }
+
+        /* --- Section: Joueur Adverse --- */
+        .section-adverse .circles-container {
+            justify-content: center;
+            gap: 15mm;
+        }
+        .section-adverse .circle {
+            width: 16mm;
+            height: 16mm;
+            border: 1.5px dashed #64748b;
+        }
+        .section-adverse .stars-rect {
+            width: 10mm;
+            height: 5mm;
+            border: 1px dashed #94a3b8;
+        }
+
+        @media print {
+            html, body {
+                background: none;
+                padding: 0;
+                margin: 0;
+                height: 100%;
+                display: block;
+            }
+            .page-a4 {
+                box-shadow: none;
+                width: 100%;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+            }
+            .card-a5 {
+                width: 100%; /* FIX : Annule la largeur fixe de 210mm qui débordait à droite */
+                height: 50%; /* FIX : Annule la hauteur fixe qui débordait en bas */
+                padding: 5mm; /* Laisse le contenu respirer */
+                box-sizing: border-box;
+            }
+            .section-mon-jeu .circles-container {
+                margin: 0 -5mm; /* Annule le padding de 5mm pour que l'équidistance des ronds aille jusqu'au bord du papier */
+            }
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            /* On ne force plus @page { margin: 0; } car cela provoque les coupures matérielles (le haut mangé) */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-a4">
+        <div class="card-a5" id="card-1"></div>
+        <div class="card-a5" id="card-2"></div>
+    </div>
+
+    <script>
+        function renderCard(containerId) {
+            const container = document.getElementById(containerId);
+            
+            // Les couleurs de GotFive
+            const colors = [
+                { name: "Vert", hex: "#10b981", start: 1 },
+                { name: "Rose", hex: "#ec4899", start: 2 },
+                { name: "Bleu", hex: "#0ea5e9", start: 3 },
+                { name: "Rouge", hex: "#ef4444", start: 4 },
+                { name: "Orange", hex: "#f59e0b", start: 5 }
+            ];
+
+            let gridHtml = '';
+            
+            colors.forEach(c => {
+                for(let i=0; i<12; i++) {
+                    let num = c.start + (i * 5);
+                    let starsCount = Math.floor(((num - 1) % 15) / 5) + 1;
+                    
+                    let dotsHtml = '';
+                    for(let s=0; s<starsCount; s++) {
+                        // On force la couleur des points à la couleur du pion pour que ce soit encore plus joli, ou gris foncé
+                        dotsHtml += `<div class="star-dot" style="background-color: ${c.hex}; opacity: 0.8;"></div>`;
+                    }
+
+                    gridHtml += `
+                        <div class="grid-cell token-cell" style="border: 1.5px solid ${c.hex};">
+                            <div class="token-num">${num}</div>
+                            <div class="stars-row">${dotsHtml}</div>
+                        </div>`;
+                }
+            });
+
+            const html = `
+                <div class="section section-mon-jeu">
+                    <div class="circles-container">
+                        ${Array(5).fill('<div class="circle-group"><div class="circle"></div><div class="stars-rect"></div><div class="color-line"></div></div>').join('')}
+                    </div>
+                </div>
+                
+                <div class="section section-deduction">
+                    <div class="grid-deduction">
+                        ${gridHtml}
+                    </div>
+                </div>
+
+                <div class="section section-adverse">
+                    <div class="circles-container">
+                        ${Array(5).fill('<div class="circle-group"><div class="circle"></div><div class="stars-rect"></div></div>').join('')}
+                    </div>
+                </div>
+            `;
+            container.innerHTML = html;
+        }
+
+        renderCard('card-1');
+        renderCard('card-2');
+    </script>
+</body>
+</html>

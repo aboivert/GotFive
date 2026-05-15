@@ -6,8 +6,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Welcome
     const startBtn = document.getElementById('start-btn');
-    const player1Input = document.getElementById('player1');
-    const player2Input = document.getElementById('player2');
+    const playerNamesContainer = document.getElementById('player-names-container');
+    const playerCountBtns = document.querySelectorAll('.count-btn');
+
+    let currentNumPlayers = 2;
+
+    function generatePlayerInputs(count) {
+        playerNamesContainer.innerHTML = '';
+        for (let i = 1; i <= count; i++) {
+            const group = document.createElement('div');
+            group.className = 'input-group';
+            group.innerHTML = `
+                <label for="player${i}">Joueur ${i}</label>
+                <input type="text" id="player${i}" placeholder="Nom du joueur ${i}" autocomplete="off">
+            `;
+            playerNamesContainer.appendChild(group);
+        }
+    }
+
+    playerCountBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            playerCountBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentNumPlayers = parseInt(btn.dataset.count);
+            generatePlayerInputs(currentNumPlayers);
+        });
+    });
+
+    // Initialisation par défaut
+    generatePlayerInputs(2);
 
     // Step Screen
     const stepTitle = document.getElementById('step-title');
@@ -41,11 +68,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const confettiContainer = document.getElementById('confetti-container');
 
     // Boutons de navigation/actions
-    const navButtons = document.querySelectorAll('.nav-btn');
-    const navBtnJ1 = document.querySelector('.nav-btn[data-info="joueur1"]');
-    const navBtnJ2 = document.querySelector('.nav-btn[data-info="joueur2"]');
-    const winJ1Btn = document.getElementById('win-j1-btn');
-    const winJ2Btn = document.getElementById('win-j2-btn');
     const continueGameBtn = document.getElementById('continue-game-btn');
     const closeViewBtn = document.getElementById('close-view');
     const authConfirmBtn = document.getElementById('auth-confirm');
@@ -62,16 +84,16 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     let state = {
-        nom1: "",
-        nom2: "",
+        players: [], // { name: "", pile: { color: [] } }
+        numPlayers: 2,
         tour: 0,
         pioche: {},
-        joueur1: {},
-        joueur2: {},
         centre: [],
         defausse: [],
         phase: "pioche",
-        initStep: 0
+        initStep: 0,
+        currentSetupPlayer: 0,
+        setupSubStep: 1
     };
 
     let pendingView = null;
@@ -85,15 +107,26 @@ document.addEventListener('DOMContentLoaded', () => {
             "rouge": [4, 9, 14, 19, 24, 29, 34, 39, 44, 49, 54, 59],
             "orange": [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60]
         };
-        COLORS.forEach(c => {
-            state.joueur1[c] = [];
-            state.joueur2[c] = [];
-        });
+        
+        state.players = [];
+        for (let i = 0; i < currentNumPlayers; i++) {
+            const playerObj = {
+                name: document.getElementById(`player${i + 1}`).value.trim() || `Joueur ${i + 1}`,
+                pile: {}
+            };
+            COLORS.forEach(c => playerObj.pile[c] = []);
+            state.players.push(playerObj);
+        }
+
+        state.numPlayers = currentNumPlayers;
         state.centre = [];
         state.defausse = [];
         state.tour = 0;
         state.phase = "pioche";
         state.initStep = 0;
+        state.currentSetupPlayer = 0; // Index du détenteur actuel (Holder)
+        state.setupSubStep = 1;
+        stepBtn.onclick = null;
     }
 
     function tirerPion(source, destination, couleur) {
@@ -111,8 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function initialisationTirage() {
         COLORS.forEach(c => {
-            tirerPion(state.pioche, state.joueur1, c);
-            tirerPion(state.pioche, state.joueur2, c);
+            state.players.forEach(p => tirerPion(state.pioche, p.pile, c));
             tirerPion(state.pioche, state.centre, c);
         });
     }
@@ -120,8 +152,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Rendu UI ---
     function updateUI() {
         turnNumSpan.textContent = state.tour + 1;
-        const currentPlayer = state.tour % 2 === 0 ? state.nom1 : state.nom2;
-        activePlayerSpan.textContent = currentPlayer;
+        const activeIdx = state.tour % state.numPlayers;
+        activePlayerSpan.textContent = state.players[activeIdx].name;
 
         // Pioche cliquable
         piocheStatsDiv.innerHTML = '';
@@ -161,6 +193,21 @@ document.addEventListener('DOMContentLoaded', () => {
             pionsCentreDiv.appendChild(p);
         });
 
+        // Section Piles Dynamiques
+        const sectionPiles = document.querySelector('.section-piles');
+        sectionPiles.innerHTML = '';
+        state.players.forEach((p, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'nav-btn';
+            btn.innerHTML = `Pile<br><span style="font-size: 0.9em;">${p.name}</span>`;
+            btn.onclick = () => {
+                pendingView = idx;
+                authMsg.textContent = `Attention ! ${p.name} ne doit pas regarder. Les autres, confirmez pour voir la pile.`;
+                modalAuth.style.display = 'flex';
+            };
+            sectionPiles.appendChild(btn);
+        });
+
         // Instructions
         piocheHint.style.display = (state.phase === "pioche") ? 'block' : 'none';
         centreHint.style.display = (state.phase === "defausse") ? 'block' : 'none';
@@ -188,13 +235,60 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function nextInitStep() {
-        state.initStep++;
-        switch (state.initStep) {
-            case 1: showScreen(stepScreen); stepTitle.textContent = "Confirmation"; stepMsg.textContent = `${state.nom1}, confirmez que vous avez bien le téléphone en main.`; stepBody.style.display = 'none'; stepBtn.textContent = "Je confirme"; break;
-            case 2: stepTitle.textContent = `Tirage de ${state.nom1}`; stepMsg.textContent = "Mémorisez bien vos cartes avant de continuer."; stepBody.style.display = 'flex'; renderPionList(stepBody, state.joueur1, true); stepBtn.textContent = "J'ai retenu mes cartes"; break;
-            case 3: stepTitle.textContent = "Passage de relai"; stepMsg.textContent = `Donnez le téléphone à ${state.nom2}. \n\n ${state.nom2}, confirmez que vous avez bien le téléphone en main.`; stepBody.style.display = 'none'; stepBtn.textContent = "Je confirme"; break;
-            case 4: stepTitle.textContent = `Tirage de ${state.nom2}`; stepMsg.textContent = "Mémorisez bien vos cartes avant de continuer."; stepBody.style.display = 'flex'; renderPionList(stepBody, state.joueur2, true); stepBtn.textContent = "C'est OK"; break;
-            case 5: showScreen(gameScreen); updateUI(); break;
+        const N = state.numPlayers;
+        const holderIdx = state.currentSetupPlayer;
+        // Le détenteur regarde la pile de la personne juste avant lui (sens anti-horaire)
+        const targetIdx = (holderIdx - 1 + N) % N;
+        
+        const targetName = state.players[targetIdx].name;
+        const holderName = state.players[holderIdx].name;
+
+        // Calcul des "autres" joueurs pour l'instruction
+        const others = state.players
+            .filter((_, idx) => idx !== targetIdx && idx !== holderIdx)
+            .map(p => p.name);
+        
+        let othersText = "";
+        if (others.length > 0) {
+            othersText = ` et montre-la à ${others.join(' et ')}`;
+        }
+
+        if (state.setupSubStep === 1) {
+            // Étape de passage du téléphone (Sauf pour le premier joueur qui l'a déjà)
+            showScreen(stepScreen);
+            stepTitle.textContent = "Passage de relai";
+            
+            if (holderIdx === 0 && state.initStep === 0) {
+                stepMsg.textContent = `${holderName}, tu commences ! Tu vas regarder une pile adverse.\n\nConfirme que tu es prêt.`;
+            } else {
+                stepMsg.textContent = `Donne le téléphone à ${holderName}.\n\n${holderName}, confirme que tu as bien le téléphone en main.`;
+            }
+            
+            stepBody.style.display = 'none';
+            stepBtn.textContent = "Je confirme";
+            state.setupSubStep = 2;
+        } else {
+            // Étape d'affichage de la pile
+            stepTitle.textContent = `Pile de ${targetName}`;
+            stepMsg.textContent = `${holderName}, regarde bien cette pile, note-la sur ta fiche${othersText}.`;
+            stepBody.style.display = 'flex';
+            renderPionList(stepBody, state.players[targetIdx].pile, true);
+            stepBtn.textContent = "C'est noté";
+            
+            // Passer au joueur suivant
+            state.setupSubStep = 1;
+            state.currentSetupPlayer++;
+            state.initStep++; // On utilise initStep pour savoir si c'est le tout début
+            
+            if (state.currentSetupPlayer >= N) {
+                // On change immédiatement le texte pour le dernier clic
+                stepBtn.textContent = "Lancer la partie";
+                stepBtn.onclick = () => {
+                    showScreen(gameScreen);
+                    updateUI();
+                    stepBtn.onclick = null;
+                };
+            }
         }
     }
 
@@ -214,22 +308,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function showPileContent(type) {
-        let content, sorted;
-        if (type === "joueur1") { content = state.joueur1; sorted = true; }
-        else if (type === "joueur2") { content = state.joueur2; sorted = true; }
-        viewTitle.textContent = (type === "joueur1") ? `Pile de ${state.nom1}` : `Pile de ${state.nom2}`;
-        renderPionList(viewPionsDiv, content, sorted);
+    function showPileContent(idx) {
+        const player = state.players[idx];
+        viewTitle.textContent = `Pile de ${player.name}`;
+        renderPionList(viewPionsDiv, player.pile, true);
         modalView.style.display = 'flex';
     }
 
     function resetGame(samePlayers) {
         modalRestart.style.display = 'none';
         modalWin.style.display = 'none';
-        initData();
+        
         if (samePlayers) {
-            navBtnJ1.textContent = `Pile ${state.nom1}`;
-            navBtnJ2.textContent = `Pile ${state.nom2}`;
+            initData(); // Reprend les noms déjà stockés
             initialisationTirage();
             nextInitStep();
         } else {
@@ -254,15 +345,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Événements ---
     startBtn.addEventListener('click', () => {
-        state.nom1 = player1Input.value.trim() || 'Joueur 1';
-        state.nom2 = player2Input.value.trim() || 'Joueur 2';
-        navBtnJ1.textContent = `Pile ${state.nom1}`;
-        navBtnJ2.textContent = `Pile ${state.nom2}`;
-
-        // Mettre à jour les noms des boutons de victoire
-        winJ1Btn.textContent = state.nom1;
-        winJ2Btn.textContent = state.nom2;
-
         initData();
         initialisationTirage();
         nextInitStep();
@@ -276,36 +358,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     stepBtn.addEventListener('click', nextInitStep);
 
-    navButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const type = btn.getAttribute('data-info');
-            if (!type) return;
-            pendingView = type;
-            authMsg.textContent = `Êtes-vous bien ${type === "joueur1" ? state.nom1 : state.nom2} ?`;
-            modalAuth.style.display = 'flex';
-        });
-    });
-
     authConfirmBtn.addEventListener('click', () => { modalAuth.style.display = 'none'; showPileContent(pendingView); });
 
     // Got Five handlers
-    gotFiveBtn.addEventListener('click', () => { modalGotFive.style.display = 'flex'; });
-    continueGameBtn.addEventListener('click', () => { modalGotFive.style.display = 'none'; });
+    gotFiveBtn.addEventListener('click', () => {
+        // Générer les boutons de gagnants dans la modale
+        const actions = document.getElementById('winner-buttons');
+        actions.innerHTML = '';
+        state.players.forEach(p => {
+            const btn = document.createElement('button');
+            btn.className = 'primary-btn';
+            btn.textContent = p.name;
+            btn.onclick = () => {
+                modalGotFive.style.display = 'none';
+                winHeadline.textContent = `Félicitations ${p.name} ! 🎉`;
+                winMsg.textContent = `Victoire bien méritée !`;
+                modalWin.style.display = 'flex';
+                createConfetti();
+            };
+            actions.appendChild(btn);
+        });
+        modalGotFive.style.display = 'flex';
+    });
 
-    winJ1Btn.addEventListener('click', () => {
-        modalGotFive.style.display = 'none';
-        winHeadline.textContent = `Félicitations ${state.nom1} ! 🎉`;
-        winMsg.textContent = `Victoire bien méritée !`;
-        modalWin.style.display = 'flex';
-        createConfetti();
-    });
-    winJ2Btn.addEventListener('click', () => {
-        modalGotFive.style.display = 'none';
-        winHeadline.textContent = `Félicitations ${state.nom2} ! 🎉`;
-        winMsg.textContent = `Victoire bien méritée !`;
-        modalWin.style.display = 'flex';
-        createConfetti();
-    });
+    continueGameBtn.addEventListener('click', () => { modalGotFive.style.display = 'none'; });
 
     closeViewBtn.addEventListener('click', () => { modalView.style.display = 'none'; });
     closeModalBtns.forEach(btn => btn.addEventListener('click', () => btn.closest('.modal').style.display = 'none'));

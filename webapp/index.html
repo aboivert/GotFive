@@ -24,13 +24,16 @@
                 <p class="subtitle">Assistant de Tirage</p>
 
                 <div class="input-group">
-                    <label for="player1">Joueur 1</label>
-                    <input type="text" id="player1" placeholder="Nom du joueur 1" autocomplete="off">
+                    <label>Nombre de joueurs</label>
+                    <div class="player-count-selector" style="display: flex; gap: 10px; margin-top: 10px;">
+                        <button type="button" class="count-btn active" data-count="2">2</button>
+                        <button type="button" class="count-btn" data-count="3">3</button>
+                        <button type="button" class="count-btn" data-count="4">4</button>
+                    </div>
                 </div>
 
-                <div class="input-group">
-                    <label for="player2">Joueur 2</label>
-                    <input type="text" id="player2" placeholder="Nom du joueur 2" autocomplete="off">
+                <div id="player-names-container">
+                    <!-- Généré dynamiquement par JS -->
                 </div>
 
                 <button id="start-btn" class="primary-btn">Démarrer la partie</button>
@@ -155,9 +158,8 @@
             <div class="modal-content">
                 <h3>Vérifiez vos pions ! 🧐</h3>
                 <p style="margin: 15px 0; color: var(--text-secondary);">Quelqu'un a-t-il gagné ?</p>
-                <div class="modal-actions">
-                    <button id="win-j1-btn" class="primary-btn">Joueur 1</button>
-                    <button id="win-j2-btn" class="primary-btn">Joueur 2</button>
+                <div class="modal-actions" id="winner-buttons">
+                    <!-- Généré dynamiquement par JS -->
                 </div>
                 <div class="modal-actions" style="margin-top: 10px;">
                     <button id="continue-game-btn" class="close-modal" style="border:none;">Personne, on continue</button>
@@ -171,7 +173,7 @@
                 <h3>Vérification</h3>
                 <p id="auth-msg">Êtes-vous bien le Joueur 1 ?</p>
                 <div class="modal-actions">
-                    <button id="auth-confirm" class="primary-btn">Oui, voir ma pile</button>
+                    <button id="auth-confirm" class="primary-btn">Oui, voir la pile</button>
                     <button id="auth-cancel" class="close-modal">Annuler</button>
                 </div>
             </div>
